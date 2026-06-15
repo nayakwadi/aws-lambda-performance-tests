@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+cdk.out/
+.cdk.staging/
+CDK_Resources.txt
+
+# Local AI context — not for the public repo
+CLAUDE.md

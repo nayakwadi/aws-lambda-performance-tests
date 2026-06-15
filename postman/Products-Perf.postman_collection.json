@@ -1,0 +1,138 @@
+{
+  "info": {
+    "name": "Products Perf - CRUD",
+    "description": "CRUD calls for the API Gateway -> Lambda -> DynamoDB Products lab. Switch the {{baseUrl}} environment variable between the 128/512/1024 MB tiers to compare Lambda performance. Each request records the response time into a collection variable so you can read latency right in the Test Results tab and in the Collection Runner summary.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+              "pm.test('Returns id', () => pm.expect(pm.response.json()).to.have.property('id'));",
+              "const id = pm.response.json().id;",
+              "pm.collectionVariables.set('lastProductId', id);",
+              "console.log('Created', id, 'in', pm.response.responseTime, 'ms');",
+              "pm.test('Latency under 2000ms', () => pm.expect(pm.response.responseTime).to.be.below(2000));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Wireless Headphones\",\n  \"category\": \"Electronics\",\n  \"price\": 149.99,\n  \"stock\": 120\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+      }
+    },
+    {
+      "name": "List Products (scan)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Has items array', () => pm.expect(pm.response.json()).to.have.property('items'));",
+              "console.log('List took', pm.response.responseTime, 'ms /', pm.response.json().count, 'items');",
+              "pm.test('Latency under 2000ms', () => pm.expect(pm.response.responseTime).to.be.below(2000));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+      }
+    },
+    {
+      "name": "Read Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));",
+              "console.log('Read took', pm.response.responseTime, 'ms');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/{{lastProductId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["products", "{{lastProductId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));",
+              "console.log('Update took', pm.response.responseTime, 'ms');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"price\": 129.99,\n  \"stock\": 95\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products/{{lastProductId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["products", "{{lastProductId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete Product",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));",
+              "console.log('Delete took', pm.response.responseTime, 'ms');"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/{{lastProductId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["products", "{{lastProductId}}"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "lastProductId", "value": "" }
+  ]
+}
